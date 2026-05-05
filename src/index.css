@@ -9,7 +9,6 @@ body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Sidebar Specific Styles */
 .sidebar {
     width: 260px;
     background-color: #2b3053;
@@ -24,15 +23,15 @@ body {
     border-bottom: 1px solid #3b426e;
 }
 
-    .sidebar-logo h2 {
-        color: #f97316;
-        margin-top: 10px;
-    }
+.sidebar-logo h2 {
+    color: #f97316;
+    margin-top: 10px;
+}
 
-    .sidebar-logo p {
-        margin-top: 5px;
-        font-size: 14px;
-    }
+.sidebar-logo p {
+    margin-top: 5px;
+    font-size: 14px;
+}
 
 .sidebar-nav {
     margin-top: 20px;
@@ -53,9 +52,9 @@ body {
     transition: background 0.3s;
 }
 
-    .menu-btn:hover {
-        background-color: #3b426e;
-    }
+.menu-btn:hover {
+    background-color: #3b426e;
+}
 
 .menu-left {
     display: flex;
@@ -76,13 +75,13 @@ body {
     transition: all 0.3s;
 }
 
-    .sub-menu-link:hover {
-        background-color: #3b426e;
-        color: white;
-    }
+.sub-menu-link:hover {
+    background-color: #3b426e;
+    color: white;
+}
 
-    .sub-menu-link.active {
-        background-color: #555e8a;
-        color: white;
-        font-weight: bold;
-    }
+.sub-menu-link.active {
+    background-color: #555e8a;
+    color: white;
+    font-weight: bold;
+}
