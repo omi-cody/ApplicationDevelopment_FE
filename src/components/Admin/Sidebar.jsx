@@ -1,73 +1,71 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { FaHome, FaUsers, FaTools, FaChartBar, FaCog, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { NavLink } from 'react-router-dom';
+import {
+    FiActivity,
+    FiBarChart2,
+    FiBookOpen,
+    FiBox,
+    FiDollarSign,
+    FiGrid,
+    FiHelpCircle,
+    FiHome,
+    FiMapPin,
+    FiShoppingCart,
+    FiTruck,
+    FiUsers,
+} from 'react-icons/fi';
+import brandLogo from '../../assets/4.png';
 
-export default function Sidebar() {
-    const [openDropdown, setOpenDropdown] = useState(null);
-    const navigate = useNavigate();
+const menuItems = [
+    { label: 'Dashboard', to: '/admin', icon: FiHome, end: true },
+    { label: 'Staff Directory', to: '/admin/staff/directory', icon: FiUsers },
+    { label: 'Register Staff', to: '/admin/staff/register', icon: FiGrid },
+    { label: 'Inventory', to: '/admin/inventory/parts', icon: FiBox },
+    { label: 'Vendors', to: '/admin/inventory/vendors', icon: FiTruck },
+    { label: 'Purchases', to: '/admin/inventory/purchases', icon: FiShoppingCart },
+    { label: 'Financial Reports', to: '/admin/reports/daily', icon: FiBarChart2 },
+    { label: 'Monthly Reports', to: '/admin/reports/monthly', icon: FiDollarSign },
+    { label: 'Yearly Reports', to: '/admin/reports/yearly', icon: FiActivity },
+    { label: 'Profile', to: '/admin/settings/profile', icon: FiMapPin },
+];
 
-    const toggleDropdown = (menu) => {
-        setOpenDropdown(openDropdown === menu ? null : menu);
-    };
-
+export default function Sidebar({ isCollapsed = false }) {
     return (
-        <div className="sidebar">
-            <div className="sidebar-logo">
-                <h2>BIKE 360</h2>
-                <p>Admin Panel</p>
+        <aside className={`admin-sidebar${isCollapsed ? ' is-collapsed' : ''}`}>
+            <div className="admin-sidebar-brand">
+                <img src={brandLogo} alt="Bike360 logo" className="admin-sidebar-logo" />
+                <div className="admin-sidebar-brand-copy">
+                    <h2>Bike 360</h2>
+                    <p>Admin Workspace</p>
+                </div>
             </div>
 
-            <nav className="sidebar-nav">
-                <button className="menu-btn" onClick={() => navigate('/admin')}>
-                    <div className="menu-left"><FaHome /> Dashboard</div>
-                </button>
-
-                <button className="menu-btn" onClick={() => toggleDropdown('staff')}>
-                    <div className="menu-left"><FaUsers /> Staff Management</div>
-                    {openDropdown === 'staff' ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
-                </button>
-                {openDropdown === 'staff' && (
-                    <div className="sub-menu">
-                        <NavLink to="/admin/staff/directory" className="sub-menu-link">Staff Directory</NavLink>
-                        <NavLink to="/admin/staff/register" className="sub-menu-link">Register New Staff</NavLink>
-                    </div>
-                )}
-
-                <button className="menu-btn" onClick={() => toggleDropdown('inventory')}>
-                    <div className="menu-left"><FaTools /> Inventory & Parts</div>
-                    {openDropdown === 'inventory' ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
-                </button>
-                {openDropdown === 'inventory' && (
-                    <div className="sub-menu">
-                        <NavLink to="/admin/inventory/parts" className="sub-menu-link">Vehicle Parts</NavLink>
-                        <NavLink to="/admin/inventory/vendors" className="sub-menu-link">Vendors</NavLink>
-                        <NavLink to="/admin/inventory/purchases" className="sub-menu-link">Purchase Invoices</NavLink>
-                    </div>
-                )}
-
-                <button className="menu-btn" onClick={() => toggleDropdown('reports')}>
-                    <div className="menu-left"><FaChartBar /> Financial Reports</div>
-                    {openDropdown === 'reports' ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
-                </button>
-                {openDropdown === 'reports' && (
-                    <div className="sub-menu">
-                        <NavLink to="/admin/reports/daily" className="sub-menu-link">Daily Revenue</NavLink>
-                        <NavLink to="/admin/reports/monthly" className="sub-menu-link">Monthly Revenue</NavLink>
-                        <NavLink to="/admin/reports/yearly" className="sub-menu-link">Yearly Revenue</NavLink>
-                    </div>
-                )}
-
-                <button className="menu-btn" onClick={() => toggleDropdown('settings')}>
-                    <div className="menu-left"><FaCog /> Settings</div>
-                    {openDropdown === 'settings' ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
-                </button>
-                {openDropdown === 'settings' && (
-                    <div className="sub-menu">
-                        <NavLink to="/admin/settings/profile" className="sub-menu-link">My Profile</NavLink>
-                        <NavLink to="/login" className="sub-menu-link">Logout</NavLink>
-                    </div>
-                )}
+            <nav className="admin-sidebar-nav" aria-label="Admin navigation">
+                {menuItems.map(({ label, to, icon: Icon, end }) => (
+                    <NavLink
+                        key={to}
+                        to={to}
+                        end={end}
+                        className={({ isActive }) =>
+                            `admin-sidebar-link${isActive ? ' is-active' : ''}`
+                        }
+                        title={isCollapsed ? label : undefined}
+                    >
+                        <Icon size={17} />
+                        <span>{label}</span>
+                    </NavLink>
+                ))}
             </nav>
-        </div>
+
+            <div className="admin-sidebar-support">
+                <button type="button" className="admin-support-link" title={isCollapsed ? 'User Guide' : undefined}>
+                    <FiBookOpen size={16} />
+                    <span>User Guide</span>
+                </button>
+                <button type="button" className="admin-support-link" title={isCollapsed ? 'Help Center' : undefined}>
+                    <FiHelpCircle size={16} />
+                    <span>Help Center</span>
+                </button>
+            </div>
+        </aside>
     );
 }
