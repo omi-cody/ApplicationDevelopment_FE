@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
-import logo from '../../assets/4.png';
+import logo from '../../assets/logo-alt.png';
+import loginVisual from '../../assets/LoginPic.png';
 import './Auth.css';
 
 export default function Login() {
@@ -8,63 +9,24 @@ export default function Login() {
 
     const handleLogin = (e) => {
         e.preventDefault();
-        // For Milestone 1, just redirect straight to the Admin panel!
         navigate('/admin');
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-left">
-                <div className="auth-glow auth-glow-top"></div>
-                <div className="auth-glow auth-glow-bottom"></div>
-                <div className="auth-grid-lines"></div>
-
-                <div className="auth-left-shell">
-                    <div className="auth-story">
-                        <p className="auth-story-kicker">BIKE COMMERCE OS</p>
-                        <h2>Run a sharper parts operation from one premium workflow.</h2>
-                        <p className="auth-story-copy">
-                            Track inventory movement, approve purchasing, and keep your shop ready for every repair,
-                            upgrade, and retail order without the usual admin drag.
-                        </p>
-
-                        <div className="auth-story-chips">
-                            <span>Live stock visibility</span>
-                            <span>Vendor coordination</span>
-                            <span>Role-based access</span>
-                        </div>
-                        <div className="auth-proof">
-                            <div className="auth-proof-row">
-                                <span>Inventory Visibility</span>
-                                <strong>Real-time stock tracking across fast-moving parts</strong>
-                            </div>
-                            <div className="auth-proof-row">
-                                <span>Vendor Workflow</span>
-                                <strong>Purchase approvals and supplier coordination in one place</strong>
-                            </div>
-                            <div className="auth-proof-row">
-                                <span>Team Access</span>
-                                <strong>Structured permissions for owners, sales staff, and inventory teams</strong>
-                            </div>
-                        </div>
+        <div className="auth-container auth-login-page">
+            <div className="auth-left auth-left-login">
+                <img src={loginVisual} alt="" className="auth-login-base-image" aria-hidden="true" />
+                <div className="auth-login-overlay" aria-hidden="true" />
+                <div className="auth-login-content">
+                    <div className="auth-story-brand">
+                        <img src={logo} alt="Bike 360 logo" />
+                        <span>BIKE 360</span>
                     </div>
-
-                    <aside className="auth-aside" aria-label="Commerce highlights">
-                        <div className="auth-aside-line"></div>
-                        <div className="auth-aside-block">
-                            <span>Stock Accuracy</span>
-                            <strong>98.2%</strong>
-                            <p>Visibility across active inventory movement and reorder timing.</p>
-                        </div>
-                        <div className="auth-aside-block">
-                            <span>Approval Speed</span>
-                            <strong>3.4x</strong>
-                            <p>Faster purchasing coordination for vendors, teams, and locations.</p>
-                        </div>
-                        <div className="auth-aside-note">
-                            Built for parts-heavy commerce teams that need precision without operational clutter.
-                        </div>
-                    </aside>
+                    <p className="auth-story-kicker">RIDE. SHOP. SERVICE.</p>
+                    <h2>Everything your bike needs, in one place.</h2>
+                    <p className="auth-story-copy auth-one-liner">
+                        Trusted parts, quick service, and a simple experience for every rider.
+                    </p>
                 </div>
             </div>
 
@@ -78,9 +40,9 @@ export default function Login() {
                 </div>
 
                 <p className="auth-subtitle">WELCOME BACK</p>
-                <h1 className="auth-title">Log in to your workspace</h1>
+                <h1 className="auth-title">Log in to BIKE 360</h1>
                 <p className="auth-panel-copy">
-                    Access inventory, suppliers, and storefront operations from your secure dashboard.
+                    Continue where you left off and access your parts, bookings, and account activity.
                 </p>
 
                 <form className="auth-form" onSubmit={handleLogin}>
@@ -109,7 +71,7 @@ export default function Login() {
                 </div>
 
                 <div className="auth-panel-trust">
-                    <span><FaCheckCircle /> Protected workspace access</span>
+                    <span><FaCheckCircle /> Secure sign-in for all BIKE 360 users</span>
                 </div>
             </div>
         </div>

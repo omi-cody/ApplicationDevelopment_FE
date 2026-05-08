@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
-import logo from '../../assets/4.png';
+import logo from '../../assets/logo-alt.png';
+import signupVisual from '../../assets/SignUp.png';
 import './Auth.css';
 
 export default function Signup() {
@@ -12,59 +13,9 @@ export default function Signup() {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-left">
-                <div className="auth-glow auth-glow-top"></div>
-                <div className="auth-glow auth-glow-bottom"></div>
-                <div className="auth-grid-lines"></div>
-
-                <div className="auth-left-shell">
-                    <div className="auth-story">
-                        <p className="auth-story-kicker">MODERN PARTS WORKFLOW</p>
-                        <h2>Launch a cleaner, faster way to manage bike inventory.</h2>
-                        <p className="auth-story-copy">
-                            Build your BIKE 360 workspace for sales, purchasing, stock control, and staff coordination
-                            with a setup designed for real commerce teams.
-                        </p>
-
-                        <div className="auth-story-chips">
-                            <span>Fast onboarding</span>
-                            <span>Smart approvals</span>
-                            <span>Multi-role teams</span>
-                        </div>
-                        <div className="auth-proof">
-                            <div className="auth-proof-row">
-                                <span>Catalog Setup</span>
-                                <strong>Organize products, categories, and vendor data without clutter</strong>
-                            </div>
-                            <div className="auth-proof-row">
-                                <span>Approval Flow</span>
-                                <strong>Move purchasing and stock decisions through a cleaner workflow</strong>
-                            </div>
-                            <div className="auth-proof-row">
-                                <span>Business Roles</span>
-                                <strong>Create one workspace for ownership, inventory, and sales operations</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <aside className="auth-aside" aria-label="Workspace setup highlights">
-                        <div className="auth-aside-line"></div>
-                        <div className="auth-aside-block">
-                            <span>Setup Time</span>
-                            <strong>Minutes</strong>
-                            <p>Stand up a cleaner workflow for catalog, suppliers, and staff access.</p>
-                        </div>
-                        <div className="auth-aside-block">
-                            <span>Team Ready</span>
-                            <strong>Multi-role</strong>
-                            <p>One workspace for owners, inventory operators, and sales coordination.</p>
-                        </div>
-                        <div className="auth-aside-note">
-                            Designed to feel organized from day one, without extra noise or interface clutter.
-                        </div>
-                    </aside>
-                </div>
+        <div className="auth-container auth-signup-page">
+            <div className="auth-left auth-left-signup">
+                <img src={signupVisual} alt="" className="auth-signup-base-image" aria-hidden="true" />
             </div>
 
             <div className="auth-right">
@@ -79,7 +30,7 @@ export default function Signup() {
                 <p className="auth-subtitle">LET'S GET STARTED</p>
                 <h1 className="auth-title">Create your account</h1>
                 <p className="auth-panel-copy">
-                    Set up your commerce workspace and start managing products, people, and purchasing with clarity.
+                    Join BIKE 360 and start exploring parts, services, and tools made for everyday users and teams.
                 </p>
 
                 <form className="auth-form" onSubmit={handleSignup}>
@@ -110,9 +61,10 @@ export default function Signup() {
                 </div>
 
                 <div className="auth-panel-trust">
-                    <span><FaCheckCircle /> Secure account creation for business teams</span>
+                    <span><FaCheckCircle /> Secure account creation for all BIKE 360 users</span>
                 </div>
             </div>
         </div>
     );
 }
+
