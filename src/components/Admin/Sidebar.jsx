@@ -13,7 +13,7 @@ import {
     FiTruck,
     FiUsers,
 } from 'react-icons/fi';
-import brandLogo from '../../assets/4.png';
+import brandLogo from '../../assets/logo-primary.png';
 
 const menuItems = [
     { label: 'Dashboard', to: '/admin', icon: FiHome, end: true },

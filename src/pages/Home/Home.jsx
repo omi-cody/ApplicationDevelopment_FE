@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FaArrowRight, FaBoxOpen, FaMotorcycle, FaShieldAlt, FaShippingFast, FaTools } from 'react-icons/fa';
-import logo from '../../assets/4.png';
+import logo from '../../assets/logo-primary.png';
 import heroImage from '../../assets/hero.png';
 import './Home.css';
 
@@ -87,3 +87,4 @@ export default function Home() {
         </div>
     );
 }
+
