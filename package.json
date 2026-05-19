@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5173 --strictPort",
+    "dev:web": "vite --port 5173 --strictPort",
+    "dev:api": "dotnet run --project backend/Rushang.Backend.API/Rushang.Backend.API.csproj --urls http://localhost:5215",
+    "dev:full": "concurrently -k -n API,WEB -c cyan,magenta \"npm:dev:api\" \"npm:dev:web\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -16,13 +19,15 @@
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.5",
     "react-icons": "^5.6.0",
-    "react-router-dom": "^7.14.2"
+    "react-router-dom": "^7.14.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",

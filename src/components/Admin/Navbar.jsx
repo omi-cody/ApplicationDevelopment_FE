@@ -11,11 +11,15 @@ import {
     FiSettings,
     FiUser,
 } from 'react-icons/fi';
+import { clearAuth } from '../../lib/auth';
+import { api } from '../../lib/api';
 
 const routeTitles = [
     { key: '/admin/staff', title: 'Staff Management' },
     { key: '/admin/inventory', title: 'Inventory & Vendors' },
-    { key: '/admin/reports', title: 'Financial Reports' },
+    { key: '/admin/reports', title: 'Reports' },
+    { key: '/admin/notifications', title: 'Alerts' },
+    { key: '/admin/settings/service-pricing', title: 'Service Pricing' },
     { key: '/admin/settings', title: 'Profile Settings' },
 ];
 
@@ -43,8 +47,8 @@ const localSearchCatalog = [
     },
     {
         id: 'inventory-parts',
-        title: 'Parts Inventory',
-        description: 'Part stock, prices and categories',
+        title: 'Parts',
+        description: 'Stock, prices and catalog items',
         to: '/admin/inventory/parts',
         keywords: ['inventory', 'parts', 'stock', 'price', 'category'],
     },
@@ -64,15 +68,15 @@ const localSearchCatalog = [
     },
     {
         id: 'report-daily',
-        title: 'Daily Financial Reports',
-        description: 'Daily income and expense summary',
+        title: 'Daily Report',
+        description: 'Daily sales and purchase summary',
         to: '/admin/reports/daily',
         keywords: ['daily', 'reports', 'finance', 'income', 'expense'],
     },
     {
         id: 'report-monthly',
         title: 'Monthly Financial Reports',
-        description: 'Monthly financial trends and performance',
+        description: 'Monthly performance and totals',
         to: '/admin/reports/monthly',
         keywords: ['monthly', 'reports', 'finance', 'trends'],
     },
@@ -90,12 +94,20 @@ const localSearchCatalog = [
         to: '/admin/settings/profile',
         keywords: ['profile', 'settings', 'account', 'preferences'],
     },
-];
-
-const notifications = [
-    { id: 1, title: 'New purchase invoice pending review', time: '2m ago', tone: 'primary' },
-    { id: 2, title: 'Inventory alert: Engine Oil stock is low', time: '14m ago', tone: 'warning' },
-    { id: 3, title: 'Monthly report export completed', time: '1h ago', tone: 'success' },
+    {
+        id: 'service-pricing',
+        title: 'Service Pricing',
+        description: 'Set pricing for half and full service',
+        to: '/admin/settings/service-pricing',
+        keywords: ['service', 'pricing', 'half service', 'full service', 'charge'],
+    },
+    {
+        id: 'system-notifications',
+        title: 'Alerts',
+        description: 'Low-stock and overdue credit alerts',
+        to: '/admin/notifications',
+        keywords: ['notification', 'alerts', 'low stock', 'overdue', 'credit'],
+    },
 ];
 
 function getTitle(pathname) {
@@ -142,6 +154,8 @@ export default function Navbar({ onToggleSidebar }) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [isMarkingRead, setIsMarkingRead] = useState(false);
     const searchShellRef = useRef(null);
     const notificationShellRef = useRef(null);
     const userShellRef = useRef(null);
@@ -213,6 +227,25 @@ export default function Navbar({ onToggleSidebar }) {
     }, [query, searchEndpoint]);
 
     useEffect(() => {
+        if (!isNotificationsOpen) return;
+
+        let isDisposed = false;
+        async function loadNotifications() {
+            try {
+                const data = await api.getAdminNotifications(8);
+                if (!isDisposed) setNotifications(data);
+            } catch {
+                if (!isDisposed) setNotifications([]);
+            }
+        }
+
+        loadNotifications();
+        return () => {
+            isDisposed = true;
+        };
+    }, [isNotificationsOpen]);
+
+    useEffect(() => {
         const closeOnOutsideClick = (event) => {
             if (searchShellRef.current && !searchShellRef.current.contains(event.target)) {
                 setIsSearchOpen(false);
@@ -282,16 +315,33 @@ export default function Navbar({ onToggleSidebar }) {
 
     const handleProfileAction = (action) => {
         if (action === 'signout') {
+            clearAuth();
             navigate('/login');
         } else if (action === 'profile') {
             navigate('/admin/settings/profile');
         } else if (action === 'help') {
-            navigate('/admin/staff/directory');
+            navigate('/admin/notifications');
         } else if (action === 'preferences') {
             navigate('/admin/settings/profile');
         }
 
         setIsUserMenuOpen(false);
+    };
+
+    const unreadCount = notifications.filter((item) => !item.isRead).length;
+    const previewNotifications = notifications.slice(0, 4);
+
+    const markAllRead = async () => {
+        setIsMarkingRead(true);
+        try {
+            await api.markAllNotificationsRead();
+            const updated = notifications.map((item) => ({ ...item, isRead: true }));
+            setNotifications(updated);
+        } catch {
+            // keep UI unchanged on failure
+        } finally {
+            setIsMarkingRead(false);
+        }
     };
 
     return (
@@ -386,26 +436,54 @@ export default function Navbar({ onToggleSidebar }) {
                         }}
                     >
                         <FiBell size={17} />
-                        <span className="admin-dot" />
+                        {unreadCount > 0 ? <span className="admin-dot" /> : null}
                     </button>
 
                     {isNotificationsOpen && (
                         <div className="admin-flyout admin-notification-flyout" role="dialog" aria-label="Notifications">
                             <div className="admin-flyout-head">
-                                <h3>Notifications</h3>
-                                <button type="button" className="admin-clear-btn">Mark all read</button>
+                                <h3>Alerts</h3>
+                                <button type="button" className="admin-clear-btn" onClick={markAllRead} disabled={isMarkingRead}>
+                                    {isMarkingRead ? 'Updating...' : 'Mark all read'}
+                                </button>
+                            </div>
+                            <div className="admin-flyout-note-bar">
+                                <span>{unreadCount} unread</span>
+                                <button
+                                    type="button"
+                                    className="admin-clear-btn"
+                                    onClick={() => {
+                                        setIsNotificationsOpen(false);
+                                        navigate('/admin/reports/daily');
+                                    }}
+                                >
+                                    Open reports
+                                </button>
                             </div>
                             <div className="admin-notification-list">
-                                {notifications.map((notification) => (
-                                    <article key={notification.id} className={`admin-notice-card tone-${notification.tone}`}>
-                                        <p>{notification.title}</p>
+                                {previewNotifications.length === 0 ? (
+                                    <p className="admin-flyout-note">No notifications yet.</p>
+                                ) : null}
+                                {previewNotifications.map((notification) => (
+                                    <article key={notification.id} className={`admin-notice-card tone-${notification.isRead ? 'success' : 'warning'}`}>
+                                        <p>{notification.message}</p>
                                         <span>
                                             <FiClock size={12} />
-                                            {notification.time}
+                                            {new Date(notification.sentAt).toLocaleString()}
                                         </span>
                                     </article>
                                 ))}
                             </div>
+                            <button
+                                type="button"
+                                className="admin-clear-btn admin-flyout-link-btn"
+                                onClick={() => {
+                                    setIsNotificationsOpen(false);
+                                    navigate('/admin/notifications');
+                                }}
+                            >
+                                View all alerts
+                            </button>
                         </div>
                     )}
                 </div>
@@ -437,7 +515,7 @@ export default function Navbar({ onToggleSidebar }) {
                             </button>
                             <button type="button" className="admin-flyout-item admin-user-item" onClick={() => handleProfileAction('help')}>
                                 <FiHelpCircle size={14} />
-                                <span>Support Center</span>
+                                <span>Alerts</span>
                             </button>
                             <button type="button" className="admin-flyout-item admin-user-item is-danger" onClick={() => handleProfileAction('signout')}>
                                 <FiLogOut size={14} />

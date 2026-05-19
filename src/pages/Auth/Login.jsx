@@ -1,15 +1,32 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
 import logo from '../../assets/logo-alt.png';
 import loginVisual from '../../assets/LoginPic.png';
 import './Auth.css';
+import { api } from '../../lib/api';
+import { saveAuth } from '../../lib/auth';
 
 export default function Login() {
     const navigate = useNavigate();
+    const [email, setEmail] = useState('admin@bike360.local');
+    const [password, setPassword] = useState('Admin@12345');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        navigate('/admin');
+        setError('');
+        setLoading(true);
+        try {
+            const response = await api.login(email, password);
+            saveAuth(response);
+            navigate('/admin');
+        } catch (err) {
+            setError(err.message || 'Login failed.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -48,19 +65,37 @@ export default function Login() {
                 <form className="auth-form" onSubmit={handleLogin}>
                     <label className="auth-field">
                         <span>Work Email</span>
-                        <input type="email" placeholder="you@bike360.com" className="auth-input" required />
+                        <input
+                            type="email"
+                            placeholder="you@bike360.com"
+                            className="auth-input"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
                     </label>
                     <label className="auth-field">
                         <span>Password</span>
-                        <input type="password" placeholder="Enter your password" className="auth-input" required />
+                        <input
+                            type="password"
+                            placeholder="Enter your password"
+                            className="auth-input"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                     </label>
 
-                    <button type="submit" className="auth-btn-primary">Sign In</button>
+                    {error ? <p style={{ color: '#b91c1c', margin: '0' }}>{error}</p> : null}
+
+                    <button type="submit" className="auth-btn-primary" disabled={loading}>
+                        {loading ? 'Signing In...' : 'Sign In'}
+                    </button>
                 </form>
 
                 <div className="divider">OR</div>
 
-                <button className="auth-btn-google">
+                <button className="auth-btn-google" disabled>
                     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="18" />
                     Sign in with Google
                 </button>

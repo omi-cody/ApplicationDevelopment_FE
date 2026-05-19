@@ -1,20 +1,30 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import AdminLayout from './layouts/AdminLayout';
 import Home from './pages/Home/Home';
 import Dashboard from './pages/Admin/Dashboard';
 import StaffManagement from './pages/Admin/StaffManagement';
+import RegisterStaff from './pages/Admin/RegisterStaff';
 import Inventory from './pages/Admin/Inventory';
 import Vendors from './pages/Admin/Vendors';
+import Purchases from './pages/Admin/Purchases';
+import FinancialReports from './pages/Admin/FinancialReports';
+import AdminNotifications from './pages/Admin/AdminNotifications';
+import AdminProfile from './pages/Admin/AdminProfile';
+import ServicePricing from './pages/Admin/ServicePricing';
+import UserGuide from './pages/Admin/UserGuide';
+import HelpCenter from './pages/Admin/HelpCenter';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
+import { isAuthenticated } from './lib/auth';
 
-const Placeholder = ({ title }) => (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-        <h2 style={{ color: '#111827' }}>{title}</h2>
-        <p style={{ marginTop: '10px', color: '#6b7280' }}>This module is currently under development.</p>
-    </div>
-);
+function AdminGuard({ children }) {
+    if (!isAuthenticated()) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
+}
 
 function App() {
     return (
@@ -24,17 +34,28 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
 
-                <Route path="/admin" element={<AdminLayout />}>
+                <Route
+                    path="/admin"
+                    element={(
+                        <AdminGuard>
+                            <AdminLayout />
+                        </AdminGuard>
+                    )}
+                >
                     <Route index element={<Dashboard />} />
                     <Route path="staff/directory" element={<StaffManagement />} />
-                    <Route path="staff/register" element={<Placeholder title="Register New Staff Form" />} />
+                    <Route path="staff/register" element={<RegisterStaff />} />
                     <Route path="inventory/parts" element={<Inventory />} />
                     <Route path="inventory/vendors" element={<Vendors />} />
-                    <Route path="inventory/purchases" element={<Placeholder title="Purchase Invoices" />} />
-                    <Route path="reports/daily" element={<Placeholder title="Daily Financial Reports" />} />
-                    <Route path="reports/monthly" element={<Placeholder title="Monthly Financial Reports" />} />
-                    <Route path="reports/yearly" element={<Placeholder title="Yearly Financial Reports" />} />
-                    <Route path="settings/profile" element={<Placeholder title="Admin Profile" />} />
+                    <Route path="inventory/purchases" element={<Purchases />} />
+                    <Route path="reports/daily" element={<FinancialReports mode="daily" />} />
+                    <Route path="reports/monthly" element={<FinancialReports mode="monthly" />} />
+                    <Route path="reports/yearly" element={<FinancialReports mode="yearly" />} />
+                    <Route path="notifications" element={<AdminNotifications />} />
+                    <Route path="settings/profile" element={<AdminProfile />} />
+                    <Route path="settings/service-pricing" element={<ServicePricing />} />
+                    <Route path="support/guide" element={<UserGuide />} />
+                    <Route path="support/help" element={<HelpCenter />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />

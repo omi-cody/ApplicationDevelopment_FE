@@ -1,449 +1,302 @@
 import {
+    BarElement,
     Chart as ChartJS,
     CategoryScale,
+    Filler,
+    LineElement,
     LinearScale,
     PointElement,
-    LineElement,
     Tooltip,
-    Filler,
 } from 'chart.js';
 import { useEffect, useMemo, useState } from 'react';
-import { Line } from 'react-chartjs-2';
-import {
-    FiActivity,
-    FiAlertTriangle,
-    FiArrowDownRight,
-    FiArrowUpRight,
-    FiCheckCircle,
-    FiDollarSign,
-    FiEdit2,
-    FiEye,
-    FiMoreVertical,
-    FiSearch,
-    FiShoppingCart,
-    FiUsers,
-    FiXCircle,
-} from 'react-icons/fi';
+import { Bar, Line } from 'react-chartjs-2';
+import { Link } from 'react-router-dom';
 import './Admin.css';
+import { api } from '../../lib/api';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler);
 
-const statCards = [
-    {
-        id: 'revenue',
-        label: 'Today Service Revenue',
-        value: 'Rs. 74,500',
-        trend: '+12%',
-        up: true,
-        icon: FiDollarSign,
-        data: [28, 34, 31, 45, 41, 49, 52],
-    },
-    {
-        id: 'jobs',
-        label: 'Open Service Jobs',
-        value: '18 Jobs',
-        trend: '+8%',
-        up: true,
-        icon: FiActivity,
-        data: [8, 9, 11, 10, 14, 16, 18],
-    },
-    {
-        id: 'parts',
-        label: 'Low Stock Parts',
-        value: '7 Items',
-        trend: '-14%',
-        up: false,
-        icon: FiAlertTriangle,
-        data: [11, 10, 9, 8, 9, 7, 7],
-    },
-    {
-        id: 'purchases',
-        label: 'Pending Purchase Orders',
-        value: '6 Orders',
-        trend: '-6%',
-        up: false,
-        icon: FiShoppingCart,
-        data: [9, 8, 7, 8, 7, 6, 6],
-    },
-    {
-        id: 'staff',
-        label: 'Active Technicians',
-        value: '9 Techs',
-        trend: '+5%',
-        up: true,
-        icon: FiUsers,
-        data: [7, 8, 8, 8, 9, 9, 9],
-    },
-];
-
-const categoryLoad = [
-    { category: 'Full Bike Servicing', progress: 86, jobs: 31 },
-    { category: 'Engine Diagnostics', progress: 72, jobs: 24 },
-    { category: 'Brake & Suspension', progress: 61, jobs: 19 },
-    { category: 'Electrical Repairs', progress: 54, jobs: 15 },
-    { category: 'Wash & Detailing', progress: 47, jobs: 12 },
-];
-
-const serviceRowsSeed = [
-    {
-        id: '#SRV-2094',
-        bike: 'Yamaha FZ V3',
-        customer: 'Sandeep Khatri',
-        service: 'Full Service',
-        technician: 'Ritesh Adhikari',
-        eta: '3 hrs',
-        bill: 'Rs. 4,800',
-        status: 'In Service',
-    },
-    {
-        id: '#SRV-2095',
-        bike: 'Honda Hornet 2.0',
-        customer: 'Pratiksha Rai',
-        service: 'Brake Check',
-        technician: 'Ankit Thapa',
-        eta: '1 hr',
-        bill: 'Rs. 1,550',
-        status: 'Ready',
-    },
-    {
-        id: '#SRV-2096',
-        bike: 'TVS Apache RTR',
-        customer: 'Dipesh KC',
-        service: 'Engine Tune-up',
-        technician: 'Suraj Magar',
-        eta: 'Waiting Parts',
-        bill: 'Rs. 2,100',
-        status: 'Waiting Parts',
-    },
-    {
-        id: '#SRV-2097',
-        bike: 'Royal Enfield Classic',
-        customer: 'Nikita Shrestha',
-        service: 'Electrical Fix',
-        technician: 'Sabin Chaudhary',
-        eta: '5 hrs',
-        bill: 'Rs. 3,450',
-        status: 'In Service',
-    },
-    {
-        id: '#SRV-2098',
-        bike: 'Bajaj Pulsar N160',
-        customer: 'Aashish Bista',
-        service: 'Chain + Oil',
-        technician: 'Milan Basnet',
-        eta: '2 hrs',
-        bill: 'Rs. 2,250',
-        status: 'Ready',
-    },
-];
-
-const metricPalette = {
-    revenue: { line: '#ff751f', top: 'rgba(255,117,31,0.35)', bottom: 'rgba(255,117,31,0.03)' },
-    jobs: { line: '#f8923d', top: 'rgba(248,146,61,0.30)', bottom: 'rgba(248,146,61,0.03)' },
-    parts: { line: '#e25e08', top: 'rgba(226,94,8,0.30)', bottom: 'rgba(226,94,8,0.03)' },
-    purchases: { line: '#ff8f47', top: 'rgba(255,143,71,0.32)', bottom: 'rgba(255,143,71,0.03)' },
-    staff: { line: '#f27922', top: 'rgba(242,121,34,0.32)', bottom: 'rgba(242,121,34,0.03)' },
-};
-
-const chartLabels = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-
-const salesOptions = {
-    maintainAspectRatio: false,
-    plugins: {
-        legend: { display: false },
-    },
-    scales: {
-        x: {
-            grid: { color: '#edf0f8' },
-            ticks: { color: '#8a91a8', font: { family: 'Manrope', size: 12 } },
-            border: { display: false },
-        },
-        y: {
-            min: 0,
-            max: 60,
-            ticks: {
-                stepSize: 10,
-                color: '#8a91a8',
-                font: { family: 'Manrope', size: 12 },
-            },
-            grid: { color: '#edf0f8' },
-            border: { display: false },
-        },
-    },
-};
+function toIsoDate(date) {
+    return date.toISOString().split('T')[0];
+}
 
 export default function Dashboard() {
-    const [tableSearch, setTableSearch] = useState('');
-    const [selectedMetric, setSelectedMetric] = useState(statCards[0].id);
-    const [hoveredMetric, setHoveredMetric] = useState(null);
-    const [serviceQueue, setServiceQueue] = useState(serviceRowsSeed);
-    const [openRowMenuId, setOpenRowMenuId] = useState(null);
-    const [rowActionFeedback, setRowActionFeedback] = useState('');
-
-    const activeMetricId = hoveredMetric || selectedMetric;
-    const activeMetric = statCards.find((metric) => metric.id === activeMetricId) || statCards[0];
-    const activePalette = metricPalette[activeMetricId] || metricPalette.revenue;
-
-    const filteredServiceRows = useMemo(() => {
-        const normalizedQuery = tableSearch.trim().toLowerCase();
-        if (!normalizedQuery) {
-            return serviceQueue;
-        }
-
-        return serviceQueue.filter((row) =>
-            Object.values(row).some((value) => String(value).toLowerCase().includes(normalizedQuery)),
-        );
-    }, [tableSearch, serviceQueue]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [trendLabels, setTrendLabels] = useState([]);
+    const [trendValues, setTrendValues] = useState([]);
+    const [trendSalesCounts, setTrendSalesCounts] = useState([]);
+    const [trendPurchaseCounts, setTrendPurchaseCounts] = useState([]);
+    const [recentPurchases, setRecentPurchases] = useState([]);
+    const [metrics, setMetrics] = useState({
+        staffCount: 0,
+        vendorCount: 0,
+        partCount: 0,
+        purchaseInvoiceCount: 0,
+        lowStockCount: 0,
+        overdueCount: 0,
+        dailyNetRevenue: 0,
+    });
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            const clickedInsideMenuShell = event.target.closest('.admin-row-menu-shell');
-            if (!clickedInsideMenuShell) {
-                setOpenRowMenuId(null);
-            }
-        };
+        async function loadDashboard() {
+            setLoading(true);
+            setError('');
+            try {
+                const today = new Date();
+                const dates = Array.from({ length: 7 }, (_, index) => {
+                    const d = new Date(today);
+                    d.setDate(today.getDate() - (6 - index));
+                    return d;
+                });
+                const dateKeys = dates.map((d) => toIsoDate(d));
 
-        const handleEscape = (event) => {
-            if (event.key === 'Escape') {
-                setOpenRowMenuId(null);
-            }
-        };
+                const [staff, vendors, parts, purchases, lowStock, overdue, daily] = await Promise.all([
+                    api.getStaff(),
+                    api.getVendors(),
+                    api.getParts(),
+                    api.getPurchaseInvoices(),
+                    api.getLowStockReport(),
+                    api.getOverdueCreditsReport(),
+                    api.getDailyReport(toIsoDate(today)),
+                ]);
 
-        document.addEventListener('mousedown', handleClickOutside);
-        document.addEventListener('keydown', handleEscape);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('keydown', handleEscape);
-        };
+                const trendReports = await Promise.all(
+                    dateKeys.map((dateKey) => api.getDailyReport(dateKey)),
+                );
+
+                setMetrics({
+                    staffCount: staff.length,
+                    vendorCount: vendors.length,
+                    partCount: parts.length,
+                    purchaseInvoiceCount: purchases.length,
+                    lowStockCount: lowStock.length,
+                    overdueCount: overdue.length,
+                    dailyNetRevenue: daily.netRevenue || 0,
+                });
+                setTrendLabels(dates.map((d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })));
+                setTrendValues(trendReports.map((item) => Number(item.netRevenue || 0)));
+                setTrendSalesCounts(trendReports.map((item) => Number(item.salesInvoiceCount || 0)));
+                setTrendPurchaseCounts(trendReports.map((item) => Number(item.purchaseInvoiceCount || 0)));
+                setRecentPurchases(purchases.slice(0, 5));
+            } catch (err) {
+                setError(err.message || 'Unable to load dashboard metrics.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadDashboard();
     }, []);
 
-    const handleQueueAction = (action, row) => {
-        if (action === 'view') {
-            setRowActionFeedback(`Opened details for ${row.id}.`);
-        }
-
-        if (action === 'reassign') {
-            setRowActionFeedback(`Reassign flow started for ${row.id}.`);
-        }
-
-        if (action === 'mark-ready') {
-            setServiceQueue((currentRows) =>
-                currentRows.map((item) =>
-                    item.id === row.id ? { ...item, status: 'Ready', eta: 'Ready for Pickup' } : item,
-                ),
-            );
-            setRowActionFeedback(`${row.id} marked as Ready.`);
-        }
-
-        if (action === 'cancel') {
-            setServiceQueue((currentRows) =>
-                currentRows.map((item) =>
-                    item.id === row.id ? { ...item, status: 'Waiting Parts', eta: 'Needs Review' } : item,
-                ),
-            );
-            setRowActionFeedback(`${row.id} set to Waiting Parts for follow-up.`);
-        }
-
-        setOpenRowMenuId(null);
-    };
-
-    const trendData = useMemo(
-        () => ({
-            labels: chartLabels,
-            datasets: [
-                {
-                    label: activeMetric.label,
-                    data: activeMetric.data,
-                    borderColor: activePalette.line,
-                    tension: 0.38,
-                    borderWidth: 2,
-                    fill: true,
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    backgroundColor: (context) => {
-                        const chart = context.chart;
-                        const { ctx, chartArea } = chart;
-                        if (!chartArea) {
-                            return activePalette.top;
-                        }
-
-                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, activePalette.top);
-                        gradient.addColorStop(1, activePalette.bottom);
-                        return gradient;
-                    },
+    const trendData = useMemo(() => ({
+        labels: trendLabels,
+        datasets: [
+            {
+                label: 'Net Revenue',
+                data: trendValues,
+                borderColor: '#ff751f',
+                tension: 0.34,
+                borderWidth: 2,
+                fill: true,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                backgroundColor: (context) => {
+                    const chart = context.chart;
+                    const { ctx, chartArea } = chart;
+                    if (!chartArea) return 'rgba(255,117,31,0.18)';
+                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    gradient.addColorStop(0, 'rgba(255,117,31,0.30)');
+                    gradient.addColorStop(1, 'rgba(255,117,31,0.02)');
+                    return gradient;
                 },
-            ],
-        }),
-        [activeMetric, activePalette],
-    );
+            },
+        ],
+    }), [trendLabels, trendValues]);
+
+    const trendOptions = useMemo(() => ({
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: {
+                grid: { color: '#eef1f8' },
+                ticks: { color: '#8d97b2', font: { size: 11, family: 'Manrope' } },
+                border: { display: false },
+            },
+            y: {
+                grid: { color: '#eef1f8' },
+                ticks: { color: '#8d97b2', font: { size: 11, family: 'Manrope' } },
+                border: { display: false },
+            },
+        },
+    }), []);
+
+    const activityData = useMemo(() => ({
+        labels: trendLabels,
+        datasets: [
+            {
+                label: 'Sales Invoices',
+                data: trendSalesCounts,
+                backgroundColor: '#ff9c5b',
+                borderRadius: 10,
+                maxBarThickness: 24,
+            },
+            {
+                label: 'Purchase Invoices',
+                data: trendPurchaseCounts,
+                backgroundColor: '#3563e9',
+                borderRadius: 10,
+                maxBarThickness: 24,
+            },
+        ],
+    }), [trendLabels, trendPurchaseCounts, trendSalesCounts]);
+
+    const activityOptions = useMemo(() => ({
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#5a6484',
+                    font: { family: 'Manrope', size: 11, weight: '600' },
+                    usePointStyle: true,
+                    boxWidth: 10,
+                },
+            },
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#8d97b2', font: { size: 11, family: 'Manrope' } },
+                border: { display: false },
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: '#eef1f8' },
+                ticks: { color: '#8d97b2', font: { size: 11, family: 'Manrope' }, precision: 0 },
+                border: { display: false },
+            },
+        },
+    }), []);
 
     return (
-        <div className="admin-page admin-dashboard">
-            <section className="admin-kpi-grid admin-kpi-grid-five">
-                {statCards.map(({ id, label, value, trend, up, icon: Icon }) => {
-                    const isActive = selectedMetric === id;
-                    const isPreview = hoveredMetric === id && selectedMetric !== id;
+        <div className="admin-page">
+            <div className="admin-header">
+                <div>
+                    <h1 className="admin-page-title">Admin Dashboard</h1>
+                    <p className="admin-page-subtitle">A live view of staff, stock, purchasing, alerts, and daily performance.</p>
+                </div>
+            </div>
 
-                    return (
-                        <button
-                            type="button"
-                            className={`admin-kpi-card ${isActive ? 'is-active' : ''} ${isPreview ? 'is-preview' : ''}`}
-                            key={id}
-                            onMouseEnter={() => setHoveredMetric(id)}
-                            onMouseLeave={() => setHoveredMetric(null)}
-                            onClick={() => setSelectedMetric(id)}
-                            aria-pressed={isActive}
-                            aria-label={`Show ${label} trend`}
-                        >
-                            <div className="admin-kpi-icon">
-                                <Icon size={15} />
-                            </div>
-                            <p>{label}</p>
-                            <h3>{value}</h3>
-                            <span className={`admin-kpi-trend ${up ? 'is-up' : 'is-down'}`}>
-                                {up ? <FiArrowUpRight size={13} /> : <FiArrowDownRight size={13} />}
-                                {trend}
-                            </span>
-                        </button>
-                    );
-                })}
+            {error ? <div className="admin-page-alert admin-page-alert-error">{error}</div> : null}
+
+            <section className="admin-kpi-grid admin-kpi-grid-five" style={{ marginBottom: '16px' }}>
+                <article className="admin-kpi-card">
+                    <p>Staff Accounts</p>
+                    <h3>{loading ? '...' : metrics.staffCount}</h3>
+                </article>
+                <article className="admin-kpi-card">
+                    <p>Vendors</p>
+                    <h3>{loading ? '...' : metrics.vendorCount}</h3>
+                </article>
+                <article className="admin-kpi-card">
+                    <p>Parts in Catalog</p>
+                    <h3>{loading ? '...' : metrics.partCount}</h3>
+                </article>
+                <article className="admin-kpi-card">
+                    <p>Purchase Invoices</p>
+                    <h3>{loading ? '...' : metrics.purchaseInvoiceCount}</h3>
+                </article>
+                <article className="admin-kpi-card">
+                    <p>Today Net Revenue</p>
+                    <h3>Rs. {loading ? '...' : Number(metrics.dailyNetRevenue).toLocaleString()}</h3>
+                </article>
             </section>
 
-            <section className="admin-analytics-grid">
+            <section className="admin-analytics-grid" style={{ marginBottom: '16px' }}>
                 <article className="admin-panel">
                     <div className="admin-panel-head">
-                        <h2>Service Category Load</h2>
-                        <button type="button" className="admin-ghost-btn">Today</button>
+                        <h2>Critical Alerts</h2>
                     </div>
-                    <div className="admin-country-list">
-                        {categoryLoad.map(({ category, progress, jobs }) => (
-                            <div className="admin-country-item" key={category}>
-                                <div className="admin-country-row">
-                                    <span>{category}</span>
-                                    <strong>{jobs} Jobs</strong>
-                                </div>
-                                <div className="admin-country-bar-track">
-                                    <div className="admin-country-bar-fill" style={{ width: `${progress}%` }} />
-                                </div>
-                            </div>
-                        ))}
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <span className={`badge ${metrics.lowStockCount > 0 ? 'badge-red' : 'badge-green'}`}>
+                            Low Stock Items: {loading ? '...' : metrics.lowStockCount}
+                        </span>
+                        <span className={`badge ${metrics.overdueCount > 0 ? 'badge-orange' : 'badge-green'}`}>
+                            Overdue Credit Cases: {loading ? '...' : metrics.overdueCount}
+                        </span>
+                    </div>
+                    <div className="admin-dashboard-actions">
+                        <Link className="btn-primary" to="/admin/notifications">Manage Alerts</Link>
+                        <Link className="btn-ghost" to="/admin/reports/daily">View Reports</Link>
                     </div>
                 </article>
 
                 <article className="admin-panel admin-sales-panel">
                     <div className="admin-panel-head">
                         <div>
-                            <h2>Weekly Operations Trend</h2>
-                            <p>
-                                {activeMetric.value} <span>{activeMetric.trend} vs previous week</span>
-                            </p>
+                            <h2>7-Day Net Revenue Trend</h2>
+                            <p>Today: Rs. {loading ? '...' : Number(metrics.dailyNetRevenue).toLocaleString()}</p>
                         </div>
-                        <button type="button" className="admin-ghost-btn">Live View</button>
                     </div>
                     <div className="admin-chart-wrap">
-                        <Line data={trendData} options={salesOptions} />
+                        <Line data={trendData} options={trendOptions} />
+                    </div>
+                </article>
+                <article className="admin-panel">
+                    <div className="admin-panel-head">
+                        <div>
+                            <h2>Weekly Invoice Activity</h2>
+                            <p>Sales versus purchase invoices across the last 7 days.</p>
+                        </div>
+                    </div>
+                    <div className="admin-chart-wrap">
+                        <Bar data={activityData} options={activityOptions} />
                     </div>
                 </article>
             </section>
 
-            <section className="admin-panel admin-table-panel">
-                <div className="admin-panel-head">
-                    <h2>Recent Service Queue</h2>
-                    <div className="admin-table-controls">
-                        <label className="admin-mini-search">
-                            <FiSearch size={14} />
-                            <input
-                                type="search"
-                                placeholder="Search jobs, customer or bike"
-                                value={tableSearch}
-                                onChange={(event) => setTableSearch(event.target.value)}
-                            />
-                        </label>
-                        <button type="button" className="admin-ghost-btn">See All</button>
-                    </div>
+            <div className="admin-card" style={{ marginBottom: '16px' }}>
+                <div className="admin-card-title">Quick Actions</div>
+                <div className="admin-dashboard-actions">
+                    <Link className="btn-primary" to="/admin/staff/directory">Staff</Link>
+                    <Link className="btn-primary" to="/admin/inventory/parts">Parts</Link>
+                    <Link className="btn-primary" to="/admin/inventory/vendors">Vendors</Link>
+                    <Link className="btn-primary" to="/admin/inventory/purchases">Create Purchase Invoices</Link>
+                    <Link className="btn-primary" to="/admin/reports/daily">Reports</Link>
+                    <Link className="btn-primary" to="/admin/notifications">Alerts</Link>
                 </div>
-                {rowActionFeedback && <p className="admin-row-feedback">{rowActionFeedback}</p>}
+            </div>
 
+            <div className="admin-card">
+                <div className="admin-card-title">Recent Purchase Invoices</div>
                 <div className="admin-table-container">
                     <table className="admin-table">
                         <thead>
                             <tr>
-                                <th>Job ID</th>
-                                <th>Bike Model</th>
-                                <th>Customer</th>
-                                <th>Service Type</th>
-                                <th>Assigned Tech</th>
-                                <th>ETA</th>
-                                <th>Bill</th>
+                                <th>Invoice</th>
+                                <th>Date</th>
                                 <th>Status</th>
-                                <th aria-label="Actions" />
+                                <th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredServiceRows.map((row) => (
-                                <tr key={row.id}>
-                                    <td className="cell-strong">{row.id}</td>
-                                    <td>{row.bike}</td>
-                                    <td>{row.customer}</td>
-                                    <td>{row.service}</td>
-                                    <td>{row.technician}</td>
-                                    <td>{row.eta}</td>
-                                    <td>{row.bill}</td>
-                                    <td>
-                                        <span className={`admin-status-chip status-${row.status.toLowerCase().replace(/\s+/g, '-')}`}>
-                                            {row.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div className="admin-row-menu-shell">
-                                            <button
-                                                type="button"
-                                                className="admin-row-menu"
-                                                aria-label={`More actions for ${row.id}`}
-                                                aria-expanded={openRowMenuId === row.id}
-                                                onClick={() =>
-                                                    setOpenRowMenuId((currentId) =>
-                                                        currentId === row.id ? null : row.id,
-                                                    )
-                                                }
-                                            >
-                                                <FiMoreVertical size={14} />
-                                            </button>
-
-                                            {openRowMenuId === row.id && (
-                                                <div className="admin-row-action-menu" role="menu" aria-label={`Actions for ${row.id}`}>
-                                                    <button type="button" className="admin-row-action-btn" onClick={() => handleQueueAction('view', row)}>
-                                                        <FiEye size={13} />
-                                                        <span>View Job</span>
-                                                    </button>
-                                                    <button type="button" className="admin-row-action-btn" onClick={() => handleQueueAction('reassign', row)}>
-                                                        <FiEdit2 size={13} />
-                                                        <span>Reassign Tech</span>
-                                                    </button>
-                                                    <button type="button" className="admin-row-action-btn" onClick={() => handleQueueAction('mark-ready', row)}>
-                                                        <FiCheckCircle size={13} />
-                                                        <span>Mark Ready</span>
-                                                    </button>
-                                                    <button type="button" className="admin-row-action-btn is-danger" onClick={() => handleQueueAction('cancel', row)}>
-                                                        <FiXCircle size={13} />
-                                                        <span>Pause / Review</span>
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
+                            {loading ? (
+                                <tr><td colSpan={4}>Loading invoices...</td></tr>
+                            ) : recentPurchases.length === 0 ? (
+                                <tr><td colSpan={4}>No purchase invoices available.</td></tr>
+                            ) : recentPurchases.map((invoice) => (
+                                <tr key={invoice.id}>
+                                    <td className="cell-strong">{invoice.invoiceNumber}</td>
+                                    <td>{new Date(invoice.purchaseDate).toLocaleDateString()}</td>
+                                    <td>{invoice.status}</td>
+                                    <td>Rs. {Number(invoice.totalAmount).toLocaleString()}</td>
                                 </tr>
                             ))}
-                            {filteredServiceRows.length === 0 && (
-                                <tr>
-                                    <td colSpan={9} className="admin-empty-cell">No service records match your search.</td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
                 </div>
-            </section>
+            </div>
         </div>
     );
 }
